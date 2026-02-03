@@ -21,11 +21,13 @@ window.quizHelpers = {
       if (el) answerlist.push(el);
     }
 
-    if (out < 0 || out >= answerlist.length) {
-      throw new Error(`Invalid answer index: ${out}`);
+    // Iterate through each index in the out array
+    for (let index of out) {
+      if (index < 0 || index >= answerlist.length) {
+        throw new Error(`Invalid answer index: ${index}`);
+      }
+      answerlist[index].click();
     }
-
-    answerlist[out].click();
 
     if (!nextButton) {
       throw new Error("Next button not found");
