@@ -19,7 +19,7 @@ RUN playwright install chromium
 
 # Copy app files
 COPY main.py .
-COPY web_helper.js ./page_helpers.js
+COPY web_helper.js ./web_helper.js
 
 # Environment setup
 ENV DISPLAY=:99

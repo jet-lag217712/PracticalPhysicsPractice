@@ -87,7 +87,7 @@ def get_question():
 def get_answers():
     return page.evaluate("() => window.quizHelpers.getAnswers()")
 
-INIT_URL = str(input("Enter URL: "))
+INIT_URL = str(input("[I] Enter URL: "))
 
 # Groq Initialization
 client = Groq(api_key=API_KEY)
@@ -108,29 +108,29 @@ page.goto(INIT_URL)
 page.wait_for_selector(".question_text", timeout=300000)
 
 print(f"[+] Ready to begin. Press Enter to Start")
-input()
+input("[I] ")
 
 print(f"[+] Starting Program")
 
 while True:
     try:
         q = get_question()
-        print(q)
+        print(f"[Q] Question: {q} \n")
         a = get_answers()
-        print(a)
+        print(f"[AL] Answer: {a} \n")
 
         out = request_answer(q, a)
-        print(a[out])
+        print(f"[AC] Correct Answer: {a[out]}")
 
         page.wait_for_timeout(random.randint(800, 1400))
 
         page.evaluate("(out) => window.quizHelpers.clickAnswerAndNext(out)", out)
 
-        print("success, next page")
+        print(f"[+] Success")
         page.wait_for_timeout(random.randint(8000, 14000))
 
     except Exception as e:
-        print("Loop stopped")
+        print("[-] Loop stopped")
         print(e)
         break
 
