@@ -8,8 +8,6 @@ from playwright.sync_api import sync_playwright
 
 load_dotenv()
 API_KEY = os.getenv("API_KEY")
-INIT_URL = os.getenv("INIT_URL")
-DEST_URL = os.getenv("DEST_URL")
 
 USER_AGENTS = [
     # Chrome - Windows
@@ -32,27 +30,6 @@ USER_AGENTS = [
     "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 "
     "(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
 ]
-
-random_ua = random.choice(USER_AGENTS)
-print(f"[+] Using User-Agent: {random_ua}")
-
-client = Groq(api_key=API_KEY)
-
-playwright = sync_playwright().start()
-browser = playwright.chromium.launch(headless=False)
-
-context = browser.new_context(
-    user_agent=random_ua,
-    viewport={"width": 1280, "height": 720},
-    locale="en-US",
-    timezone_id="America/Los_Angeles"
-)
-page = context.new_page()
-page.add_init_script("""
-    Object.defineProperty(navigator, 'webdriver', {
-    get: () => undefined
-    });
-    """)
 
 def request_answer(question, answer):
     output = client.chat.completions.create(
@@ -81,29 +58,59 @@ def request_answer(question, answer):
     answer_index = int(output.choices[0].message.content)
     return answer_index - 1
 
+def init_page(playwright, user_agent: str):
+    browser = playwright.chromium.launch(headless=False)
+
+    context = browser.new_context(
+        user_agent=user_agent,
+        viewport={"width": 1280, "height": 720},
+        locale="en-US",
+        timezone_id="America/Los_Angeles"
+    )
+
+    page = context.new_page()
+
+    page.add_init_script("""
+        Object.defineProperty(navigator, 'webdriver', {
+            get: () => undefined
+        });
+    """)
+
+    page.add_init_script(path="web_helper.js")
+
+    return browser, context, page
+
 def get_question():
     page.wait_for_selector(".question_text")
     return page.query_selector(".question_text").inner_text()
 
 def get_answers():
-    answers_list = page.evaluate("""
-        () => {
-            let answers = document.querySelectorAll(".answer");
-            let answerlist = [];
-            for (let i = 0; i < answers.length; i++) {
-                answerlist[i] = answers[i].children[0].children[1];
-            }
-            return answerlist.map(el => el.textContent);
-        }
-    """)
-    return [ans.strip() for ans in answers_list]
+    return page.evaluate("() => window.quizHelpers.getAnswers()")
 
+INIT_URL = str(input("Enter URL: "))
+
+# Groq Initialization
+client = Groq(api_key=API_KEY)
+
+# User Agent Selection
+random_ua = random.choice(USER_AGENTS)
+
+# Playwright Initialization
+playwright = sync_playwright().start()
+browser, context, page = init_page(playwright, random_ua)
+
+print(f"[+] Using URL: {INIT_URL}")
+print(f"[+] Using User-Agent: {random_ua}")
+
+print(f"[+] Opening Webpage, Waiting for Start")
 page.goto(INIT_URL)
+
 page.wait_for_selector(".question_text", timeout=300000)
 
-print("ready, on countdown")
-page.wait_for_timeout(15000)
-print("ready, hide the chrome tab")
+print(f"[+] Ready to begin. Press Enter to Start")
+input()
+
+print(f"[+] Starting Program")
 
 while True:
     try:
@@ -117,30 +124,7 @@ while True:
 
         page.wait_for_timeout(random.randint(800, 1400))
 
-        page.evaluate("""
-        (out) => {
-            let answers = document.querySelectorAll(".answer");
-            let nextButton = document.querySelector(".submit_button.next-question");
-            let answerlist = [];
-            
-            for (let i = 0; i < answers.length; i++) {
-                let el = answers[i].children[0]?.children[1];
-                if (el) answerlist.push(el);
-            }
-
-            if (out < 0 || out >= answerlist.length) {
-                throw new Error(`Invalid answer index: ${out}`);
-            }
-            
-            answerlist[out].click();
-
-            if (!nextButton) {
-                throw new Error("Next button not found");
-            }
-
-            nextButton.click();
-        }
-        """, out)
+        page.evaluate("(out) => window.quizHelpers.clickAnswerAndNext(out)", out)
 
         print("success, next page")
         page.wait_for_timeout(random.randint(8000, 14000))
