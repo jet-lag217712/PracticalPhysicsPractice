@@ -31,15 +31,26 @@ USER_AGENTS = [
     "(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
 ]
 
-def request_answer(question, answer):
+def request_answer(question, answer, type):
+    if type == 'radio':
+        system_content = """
+        Output ONLY the correct answer NUMBER.
+        This should be the output structure (do not output curly brackets): {1-4}
+        You are to only select ONE option"
+        """
+    elif type == 'checkbox':
+        system_content = """
+        Output ONLY the correct answer NUMBER.
+        This should be the output structure (do not output curly brackets): {1, 2, 3, 4}
+        You are to only select ALL CORRECT options"
+        """
     output = client.chat.completions.create(
         model="moonshotai/kimi-k2-instruct-0905",
         messages=[
             {
                 "role": "system",
                 "content": (
-                    "Output ONLY the correct answer NUMBER. "
-                    "This should be the output structure (do not output curly brackets): {1-4}"
+                    system_content
                 )
             },
             {
@@ -55,8 +66,13 @@ def request_answer(question, answer):
         top_p=1,
         stream=False
     )
-    answer_index = int(output.choices[0].message.content)
-    return answer_index - 1
+
+    answer_text = output.choices[0].message.content.strip()
+    if ',' in answer_text:
+        answer_indices = [int(x.strip()) - 1 for x in answer_text.split(',')]
+    else:
+        answer_indices = [int(answer_text) - 1]
+    return answer_indices
 
 def init_page(playwright, user_agent: str):
     browser = playwright.chromium.launch(headless=False)
@@ -87,6 +103,9 @@ def get_question():
 def get_answers():
     return page.evaluate("() => window.quizHelpers.getAnswers()")
 
+def get_answer_type():
+    return page.locator(".question_input").first.get_attribute("type")
+
 INIT_URL = str(input("[I] Enter URL: "))
 
 # Groq Initialization
@@ -108,7 +127,7 @@ page.goto(INIT_URL)
 page.wait_for_selector(".question_text", timeout=300000)
 
 print(f"[+] Ready to begin. Press Enter to Start")
-input("[I] ")
+input(f"[I] ")
 
 print(f"[+] Starting Program")
 
@@ -118,13 +137,14 @@ while True:
         print(f"[Q] Question: {q} \n")
         a = get_answers()
         print(f"[AL] Answer: {a} \n")
+        type = get_answer_type()
 
-        out = request_answer(q, a)
-        print(f"[AC] Correct Answer: {a[out]}")
+        out = request_answer(q, a, type)
+        print(f"[AC] Correct Answer(s): {out}")
 
         page.wait_for_timeout(random.randint(800, 1400))
 
-        page.evaluate("(out) => window.quizHelpers.clickAnswerAndNext(out)", out)
+        page.evaluate("window.quizHelpers.clickAnswerAndNext", out)
 
         print(f"[+] Success")
         page.wait_for_timeout(random.randint(8000, 14000))
