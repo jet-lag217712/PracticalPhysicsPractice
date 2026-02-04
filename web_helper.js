@@ -1,3 +1,7 @@
+Object.defineProperty(navigator, 'webdriver', {
+            get: () => undefined
+        });
+
 window.quizHelpers = {
   getAnswers: () => {
     let answers = document.querySelectorAll(".answer");
@@ -34,5 +38,15 @@ window.quizHelpers = {
     }
 
     nextButton.click();
+  },
+
+  getQuestionImages: () => {
+    let images = document.querySelector(".question_text").querySelectorAll("img")
+    let imagelist = [];
+    images.forEach((image) => {
+      imagelist.push(image.src)
+    });
+    return imagelist;
   }
+
 };
