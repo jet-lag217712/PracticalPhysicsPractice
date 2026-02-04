@@ -95,13 +95,13 @@ def request_picture_answer(question, answer, type, image_path):
 def request_answer(question, answer, type):
     if type == 'radio':
         system_content = """
-        Output ONLY the correct answer NUMBER.
+        Output ONLY the correct answer NUMBER. If you are unsure, output 3.
         This should be the output structure (do not output curly brackets): {1-4}
         You are to only select ONE option"
         """
     elif type == 'checkbox':
         system_content = """
-        Output ONLY the correct answer NUMBER.
+        Output ONLY the correct answer NUMBER. If you are unsure, output 3.
         This should be the output structure (do not output curly brackets): {1, 2, 3, 4}
         You are to only select ALL CORRECT options"
         """
@@ -252,7 +252,7 @@ while True:
             stack_images("images", "question.png")
             out = request_picture_answer(q, a, a_type, "question.png")
 
-        out = request_picture_answer(q, a, a_type, "question.png")
+        out = request_answer(q, a, a_type)
 
         print(f"[AC] Correct Answer(s): {out}")
 
@@ -266,7 +266,7 @@ while True:
         print(f"[+] Success")
 
         # 'Reading Question'
-        page.wait_for_timeout(random.randint(8000, 14000))
+        page.wait_for_timeout(random.randint(4000, 7000))
 
     except Exception as e:
         print("[-] Loop stopped")
