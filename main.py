@@ -105,6 +105,7 @@ def request_answer(question, answer, type):
         This should be the output structure (do not output curly brackets): {1, 2, 3, 4}
         You are to only select ALL CORRECT options"
         """
+
     output = client.chat.completions.create(
         model="moonshotai/kimi-k2-instruct-0905",
         messages=[
