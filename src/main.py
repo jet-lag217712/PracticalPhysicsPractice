@@ -60,7 +60,7 @@ while True:
             get_question_image(page, context)
             stacked_path = stack_images(image_dir=image_dir, output="question.png")
             out = request_picture_answer(client, q, a, a_type, stacked_path)
-            delete_images(image_dir=image_dir)
+            delete_images()
 
         out = request_answer(client, q, a, a_type)
 

@@ -9,12 +9,12 @@ def convert_answer_list(answer_text, qtype="radio"):
         if re.match(r'^\d$', answer_text):
             return [int(answer_text) - 1]
         else:
-            return [3]  # fallback if invalid
+            return [0]  # fallback if invalid
     elif qtype == "checkbox":
         if re.match(r'^\d(,\d)*$', answer_text):
             return [int(x) - 1 for x in answer_text.split(',')]
         else:
-            return [3]  # fallback if invalid
+            return [0]  # fallback if invalid
 
 
 def parse_answer(output, type):
