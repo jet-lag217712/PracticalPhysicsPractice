@@ -1,6 +1,6 @@
 import base64
 
-from src.utils.sys_context import system_context_radio, system_context_checkbox
+from src.utils.sys_context import system_context_radio, system_context_checkbox, system_context_textbox
 from src.utils.answer import *
 
 def request_picture_answer(client, question, answer, type, image_path):
@@ -8,12 +8,14 @@ def request_picture_answer(client, question, answer, type, image_path):
         context = system_context_radio
     elif type == 'checkbox':
         context = system_context_checkbox
+    elif type == 'text':
+        context = system_context_textbox
 
     with open(image_path, "rb") as f:
         image_base64 = base64.b64encode(f.read()).decode("utf-8")
 
     output = client.chat.completions.create(
-        model="meta-llama/llama-4-maverick-17b-128e-instruct",
+        model="meta-llama/llama-4-scout-17b-16e-instruct",
         messages=[
             {
                 "role": "system",
@@ -43,6 +45,9 @@ def request_picture_answer(client, question, answer, type, image_path):
         top_p=1,
         stream=False
     )
+
+    if type == 'text':
+        return output.choices[0].message.content.strip()
 
     answer_text = output.choices[0].message.content.strip()
     return convert_answer_list(answer_text, qtype=type)

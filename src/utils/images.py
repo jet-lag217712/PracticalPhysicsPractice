@@ -4,7 +4,7 @@ import shutil
 from PIL import Image
 
 def make_images(question_dir="images"):
-    os.makedirs(question_dir, exist_ok=True)
+    os.makedirs(question_dir, exist_ok=False)
     return question_dir
 
 def stack_images(image_dir="images", output="super_image.png"):
@@ -18,19 +18,17 @@ def stack_images(image_dir="images", output="super_image.png"):
         img.resize((max_width, int(img.height * max_width / img.width)))
         for img in images
     ]
-
     total_height = sum(img.height for img in resized)
     final_img = Image.new("RGB", (max_width, total_height))
-
     y = 0
     for img in resized:
         final_img.paste(img, (0, y))
         y += img.height
-
     final_img.save(output)
     return output
 
 def delete_images():
     if os.path.exists("images"):
         shutil.rmtree("images")
-    os.remove("question.png")
+    if os.path.exists("question.png"):
+        os.remove("question.png")

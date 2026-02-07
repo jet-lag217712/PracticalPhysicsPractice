@@ -1,6 +1,6 @@
 import base64
 
-from src.utils.sys_context import system_context_radio, system_context_checkbox
+from src.utils.sys_context import system_context_radio, system_context_checkbox, system_context_textbox
 from src.utils.answer import *
 
 def request_answer(client, question, answer, type):
@@ -9,9 +9,11 @@ def request_answer(client, question, answer, type):
         context = system_context_radio
     elif type == 'checkbox':
         context = system_context_checkbox
+    elif type == 'text':
+        context = system_context_textbox
 
     output = client.chat.completions.create(
-        model="meta-llama/llama-4-maverick-17b-128e-instruct",
+        model="meta-llama/llama-4-scout-17b-16e-instruct",
         messages=[
             {
                 "role": "system",
