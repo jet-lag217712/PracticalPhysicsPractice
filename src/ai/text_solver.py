@@ -11,7 +11,7 @@ def request_answer(client, question, answer, type):
         context = system_context_textbox
 
     output = client.chat.completions.create(
-        model="meta-llama/llama-4-scout-17b-16e-instruct",
+        model="openai/gpt-oss-120b",
         messages=[
             {
                 "role": "system",
@@ -27,7 +27,7 @@ def request_answer(client, question, answer, type):
                 """
             }
         ],
-        temperature=1,
+        temperature=0.25,
         max_completion_tokens=256,
         top_p=1,
         stream=False

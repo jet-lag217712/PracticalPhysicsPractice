@@ -1,53 +1,43 @@
-import base64
-
-from src.ai.prompts.sys_context import system_context_radio, system_context_checkbox, system_context_textbox
+from google.genai import types
+from src.ai.prompts.sys_context import *
 from src.quiz.util.answer_util import *
 
-def request_picture_answer(client, question, answer, type, image_path):
-    if type == 'radio':
+
+def request_picture_answer(client, question, answer, qtype, image_path):
+    if qtype == "radio":
         context = system_context_radio
-    elif type == 'checkbox':
+    elif qtype == "checkbox":
         context = system_context_checkbox
-    elif type == 'text':
+    elif qtype == "text":
         context = system_context_textbox
+    else:
+        raise ValueError(f"Unknown question type: {qtype}")
 
     with open(image_path, "rb") as f:
-        image_base64 = base64.b64encode(f.read()).decode("utf-8")
+        image_bytes = f.read()
 
-    output = client.chat.completions.create(
-        model="meta-llama/llama-4-scout-17b-16e-instruct",
-        messages=[
-            {
-                "role": "system",
-                "content": context
-            },
-            {
-                "role": "user",
-                "content": [
-                    {
-                        "type": "text",
-                        "text": f"""
-                            Question: {question}
-                            Answer Choices: {answer}
-                            """
-                    },
-                    {
-                        "type": "image_url",
-                        "image_url": {
-                            "url": f"data:image/png;base64,{image_base64}"
-                        }
-                    }
-                ]
-            }
+    response = client.models.generate_content(
+        model="gemini-2.5-flash-lite",
+        contents=[
+            types.Content(
+                role="user",
+                parts=[
+                    types.Part(text=f"""
+                        System Instructions: {context}
+                        Question: {question}
+                        Answer Choices: {answer}
+                    """),
+                    types.Part(
+                        inline_data=types.Blob(
+                            mime_type="image/png",
+                            data=image_bytes,
+                        )
+                    ),
+                ],
+            )
         ],
-        temperature=1,
-        max_completion_tokens=256,
-        top_p=1,
-        stream=False
     )
-
-    if type == 'text':
-        return output.choices[0].message.content.strip()
-
-    answer_text = output.choices[0].message.content.strip()
-    return convert_answer_list(answer_text, qtype=type)
+    answer_text = response.text.strip()
+    if qtype == "text":
+        return answer_text
+    return convert_answer_list(answer_text, qtype=qtype)

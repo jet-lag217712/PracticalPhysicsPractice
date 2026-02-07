@@ -1,5 +1,6 @@
 def get_question(page):
-    return page.query_selector(".question_text").inner_text()
+    question = page.query_selector(".question_text").inner_text()
+    return question.strip()
 
 def get_question_image(page):
     images = page.evaluate("""

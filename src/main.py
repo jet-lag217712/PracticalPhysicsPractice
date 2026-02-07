@@ -1,10 +1,10 @@
-import time
 import random
 
 from groq import Groq
+from google import genai
 from playwright.sync_api import sync_playwright
 
-from src.config import API_KEYS
+from src.config import GROQ_API_KEYS, GOOGLE_API_KEYS
 
 from src.browser.playwright import init_page, javascript_load
 from src.browser.google_login import google_login
@@ -56,10 +56,13 @@ while True:
         print("[+] Images Directory Cleared")
 
         # Groq Initialization (New Client Per Question)
-        api_key = random.choice(API_KEYS)
-        client = Groq(api_key=api_key)
-        print(f"[+] Groq Initialized")
-        print(f"[+] API KEY: {API_KEYS.index(api_key) + 1}")
+        groq_api_key = random.choice(GROQ_API_KEYS)
+        google_api_key = random.choice(GOOGLE_API_KEYS)
+        text_client = Groq(api_key=groq_api_key)
+        image_client = genai.Client(api_key=google_api_key)
+        print(f"[+] AI Clients Initialized")
+        print(f"[+] Groq API KEY: {GROQ_API_KEYS.index(groq_api_key) + 1}")
+        print(f"[+] Gemini API KEY: {GOOGLE_API_KEYS.index(google_api_key) + 1}")
 
         # Waits for JS to load
         javascript_load(page)
@@ -67,7 +70,7 @@ while True:
 
         # Reading Question
         print(f"[+] Reading Question...")
-        page.wait_for_timeout(random.randint(4000, 7000))
+        # page.wait_for_timeout(random.randint(4000, 7000))
         print(f"[+] Finished Reading Question")
 
         # Gets Question Information
@@ -94,11 +97,11 @@ while True:
             print(f"[+] Downloaded Images")
             stacked_path = stack_images(image_dir=image_dir, output="question.png")
             print(f"[+] Stacked Images")
-            print(f"[+] Sending Groq API Query with Image")
-            out = request_picture_answer(client, q, a, a_type, stacked_path)
+            print(f"[+] Sending Google Gemini API Query with Image")
+            out = request_picture_answer(image_client, q, a, a_type, stacked_path)
         else:
             print(f"[+] Sending Groq API Query")
-            out = request_answer(client, q, a, a_type)
+            out = request_answer(text_client, q, a, a_type)
 
         print(f"[+] Correct Answer(s): {out}")
         if a_type == "text":
