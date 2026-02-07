@@ -4,16 +4,16 @@ import random
 from groq import Groq
 from playwright.sync_api import sync_playwright
 
-from config import API_KEYS
+from src.config import API_KEYS
 
-from browser.playwright import init_page, javascript_load
-from browser.google_login import google_login
+from src.browser.playwright import init_page, javascript_load
+from src.browser.google_login import google_login
 
-from quiz.questions import *
-from quiz.answer import *
+from src.quiz.questions import *
+from src.quiz.answer import *
 
-from ai.text_solver import request_answer
-from ai.image_solver import request_picture_answer
+from src.ai.text_solver import request_answer
+from src.ai.image_solver import request_picture_answer
 
 from src.quiz.util.question_util import stack_images, delete_images_directory, make_images_directory
 from src.browser.utils.user_agents import USER_AGENTS
