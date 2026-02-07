@@ -38,9 +38,7 @@ def click_next(page):
 def google_login(page):
     email, password = AUTH
     click_google_login(page)
-    # Email step
     enter_email(page, email)
     click_next(page)
-    # Password step
     enter_password(page, password)
     click_next(page)

@@ -11,7 +11,7 @@ def init_page(playwright, user_agent: str):
         Object.defineProperty(navigator, 'webdriver', {
             get: () => undefined
         });
-    """, path="src/js/web_helper.js")
+    """)
     return browser, context, page
 
 def javascript_load(page):

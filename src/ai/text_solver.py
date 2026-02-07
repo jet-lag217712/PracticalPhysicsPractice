@@ -1,7 +1,5 @@
-import base64
-
-from src.utils.sys_context import system_context_radio, system_context_checkbox, system_context_textbox
-from src.utils.answer import *
+from src.ai.prompts.sys_context import system_context_radio, system_context_checkbox, system_context_textbox
+from src.quiz.util.answer_util import *
 
 def request_answer(client, question, answer, type):
 

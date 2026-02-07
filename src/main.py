@@ -15,8 +15,8 @@ from quiz.answer import *
 from ai.text_solver import request_answer
 from ai.image_solver import request_picture_answer
 
-from utils.images import stack_images, delete_images, make_images
-from utils.user_agents import USER_AGENTS
+from src.quiz.util.question_util import stack_images, delete_images_directory, make_images_directory
+from src.browser.utils.user_agents import USER_AGENTS
 
 # Getting Initial URL
 INIT_URL = str(input("[I] Enter URL: "))
@@ -52,7 +52,7 @@ print(f"[+] Starting Program")
 while True:
     try:
         # Clear Images Directory
-        delete_images()
+        delete_images_directory()
         print("[+] Images Directory Cleared")
 
         # Groq Initialization (New Client Per Question)
@@ -88,7 +88,7 @@ while True:
 
         if q_type:
             print(f"[+] Image found")
-            image_dir = make_images()
+            image_dir = make_images_directory()
             print(f"[+] Made Image Directory")
             get_question_image(page)
             print(f"[+] Downloaded Images")
@@ -96,7 +96,6 @@ while True:
             print(f"[+] Stacked Images")
             print(f"[+] Sending Groq API Query with Image")
             out = request_picture_answer(client, q, a, a_type, stacked_path)
-
         else:
             print(f"[+] Sending Groq API Query")
             out = request_answer(client, q, a, a_type)
@@ -118,7 +117,7 @@ while True:
     except ButtonNotFound:
         print(f"[+] Next Button Not Found")
         print(f"[+] Prepare to Submit")
-        print(f"[+] Thank You! Make sure to close the extra tab!")
+        print(f"[+] Thank You! Submit and Press Enter to End the Program!")
         break
 
     except Exception as e:
@@ -126,4 +125,4 @@ while True:
         print(e)
         break
 
-time.sleep(600)
+input()

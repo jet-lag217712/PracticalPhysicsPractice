@@ -3,7 +3,7 @@ import shutil
 
 from PIL import Image
 
-def make_images(question_dir="images"):
+def make_images_directory(question_dir="images"):
     os.makedirs(question_dir, exist_ok=False)
     return question_dir
 
@@ -27,8 +27,8 @@ def stack_images(image_dir="images", output="super_image.png"):
     final_img.save(output)
     return output
 
-def delete_images():
+def delete_images_directory():
     if os.path.exists("images"):
         shutil.rmtree("images")
-    if os.path.exists("question.png"):
-        os.remove("question.png")
+    if os.path.exists("super_image.png"):
+        os.remove("super_image.png")
